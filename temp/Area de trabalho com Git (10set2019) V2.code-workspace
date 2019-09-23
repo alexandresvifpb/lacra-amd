@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "D:\\downloads\\doutorado\\2019\\prototipos\\firmwares"
+		},
+		{
+			"name": "Test_ESP32-TTGO_GPS-RSSI-01",
+			"path": "D:\\downloads\\doutorado\\2019\\prototipos\\firmwares\\lacra-amd\\Test_ESP32-TTGO_GPS-RSSI-01"
+		}
+	],
+    "settings": {
+        "terminal.integrated.env.windows": {
+            "PATH": "C:\\Users\\alexa\\.platformio\\penv\\Scripts;C:\\Users\\alexa\\.platformio\\penv;C:\\Program Files (x86)\\Common Files\\Oracle\\Java\\javapath;C:\\ProgramData\\Oracle\\Java\\javapath;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\Program Files (x86)\\NVIDIA Corporation\\PhysX\\Common;d:\\Program Files\\Git\\cmd;C:\\Program Files\\Common Files\\Autodesk Shared\\;D:\\Program Files\\PuTTY\\;C:\\WINDOWS\\System32\\OpenSSH\\;D:\\Python27\\;D:\\Python27\\Scripts\\;C:\\Program Files\\Intel\\WiFi\\bin\\;C:\\Program Files\\Common Files\\Intel\\WirelessCommon\\;D:\\Program Files (x86)\\Brackets\\command;C:\\Program Files\\NVIDIA Corporation\\NVIDIA NvDLISR;C:\\Program Files\\Microsoft SQL Server\\120\\Tools\\Binn\\;%SystemRoot%\\system32;%SystemRoot%;%SystemRoot%\\System32\\Wbem;%SYSTEMROOT%\\System32\\WindowsPowerShell\\v1.0\\;%SYSTEMROOT%\\System32\\OpenSSH\\;C:\\Users\\alexa\\AppData\\Local\\Microsoft\\WindowsApps;d:\\Program Files\\LLVM\\bin;C:\\Users\\alexa\\AppData\\Local\\atom\\bin;d:\\Users\\alexa\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Program Files\\Intel\\WiFi\\bin\\;C:\\Program Files\\Common Files\\Intel\\WirelessCommon\\;%USERPROFILE%\\AppData\\Local\\Microsoft\\WindowsApps;;C:\\Program Files (x86)\\Common Files\\Oracle\\Java\\javapath;C:\\ProgramData\\Oracle\\Java\\javapath;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\Program Files (x86)\\NVIDIA Corporation\\PhysX\\Common;d:\\Program Files\\Git\\cmd;C:\\Program Files\\Common Files\\Autodesk Shared\\;D:\\Program Files\\PuTTY\\;C:\\WINDOWS\\System32\\OpenSSH\\;D:\\Python27\\;D:\\Python27\\Scripts\\;C:\\Program Files\\Intel\\WiFi\\bin\\;C:\\Program Files\\Common Files\\Intel\\WirelessCommon\\;D:\\Program Files (x86)\\Brackets\\command;C:\\Program Files\\NVIDIA Corporation\\NVIDIA NvDLISR;C:\\Program Files\\Microsoft SQL Server\\120\\Tools\\Binn\\;%SystemRoot%\\system32;%SystemRoot%;%SystemRoot%\\System32\\Wbem;%SYSTEMROOT%\\System32\\WindowsPowerShell\\v1.0\\;%SYSTEMROOT%\\System32\\OpenSSH\\;C:\\Users\\alexa\\AppData\\Local\\Microsoft\\WindowsApps;d:\\Program Files\\LLVM\\bin;C:\\Users\\alexa\\AppData\\Local\\atom\\bin;d:\\Users\\alexa\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Program Files\\Intel\\WiFi\\bin\\;C:\\Program Files\\Common Files\\Intel\\WirelessCommon\\;%USERPROFILE%\\AppData\\Local\\Microsoft\\WindowsApps;",
+            "PLATFORMIO_CALLER": "vscode"
+        }
+    }
+}
