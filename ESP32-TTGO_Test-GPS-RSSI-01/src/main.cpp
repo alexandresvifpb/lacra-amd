@@ -27,7 +27,11 @@ boolean isActiveGPS = false;
 
 time_t nowTime();
 
+<<<<<<< HEAD
 uint16_t delaySendLoRa = 1000;       // intervalo entre um nova transmissao
+=======
+uint16_t delaySendLoRa = 200;       // intervalo entre um nova transmissao
+>>>>>>> a100570ae2d9a3e9ee7f105169e6747e82862d62
 uint64_t lastTimeLora = millis();
 boolean sendPacket = false;
 
