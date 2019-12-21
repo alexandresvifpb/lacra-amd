@@ -184,12 +184,26 @@ void TaskLoRa( void * pvParameters ) {
             if (lora.loraDebugMain) Serial.println("---> lora.isReceived()");
 
             String strRecv = lora.getStrRecv();
+            messageLoRa_t messageRecv = lora.getMsgRecv();
 
             if (lora.loraDebugMain) Serial.print("strRecv: ");
             if (lora.loraDebugMain) Serial.println(strRecv);
 
+            if (messageRecv.type != 9) {
             listMessageSendMQTT.add(strRecv);
             numberMessageSendMQTT++;
+            } else {
+                String commandEpochTime = "\"";
+                commandEpochTime += messageRecv.id;
+                commandEpochTime += "\",type=10,payload=";
+                commandEpochTime += String(now());
+                commandEpochTime += "}"
+
+                Serial.print("commandEpochTime: ");
+                Serial.println(commandEpochTime);
+                
+                lora.send(commandEpochTime);
+            }
 
             if (lora.loraDebugMain) Serial.println("lora.isReceived() --->");
         }

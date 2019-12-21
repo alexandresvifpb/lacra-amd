@@ -1,11 +1,11 @@
 // #include <Arduino.h>
-#include "ESP32LibV1.h"
+#include "ESP32LibV2.h"
 #include "esp_task.h"
 #include "esp_task_wdt.h"
 
 //===========================================
 //  LoRa SX1276/8
-#include "ESP32LibV1.h"
+// #include "ESP32LibV1.h"
 
 ESP32Lib esp32util = ESP32Lib();
 String addressIdESP = esp32util.getMacAddress();

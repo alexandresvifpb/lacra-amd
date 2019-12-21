@@ -1,4 +1,4 @@
-/*
+ /*
 Arduino-MAX30100 oximetry / heart rate integrated sensor library
 Copyright (C) 2016  OXullo Intersecans <x@brainrapers.org>
 
