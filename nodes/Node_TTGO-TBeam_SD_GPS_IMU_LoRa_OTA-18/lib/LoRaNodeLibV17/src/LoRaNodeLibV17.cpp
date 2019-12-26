@@ -39,6 +39,7 @@ boolean LoRaNodeLib::begin(void) {
     newRecvMessages = false;
 
     loraDebugMain = LORA_DEBUG_MAIN;
+    loraDebugSendRecv = LORA_DEBUG_SEND_RECV;
     loraTaskDelayMS = LORA_TASK_DELAY_MS;
     loraDebugTimeSerial = LORA_DEBUG_TIME_SERIAL/loraTaskDelayMS;
 
@@ -52,7 +53,7 @@ boolean LoRaNodeLib::send(String strSend) {
 
     bool result = false;
 
-    if (loraDebugMain) {
+    if (loraDebugSendRecv) {
         Serial.print("LORA_SEND: ");
         Serial.println(strSend);
     }

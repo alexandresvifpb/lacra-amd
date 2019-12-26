@@ -30,8 +30,8 @@ extern "C" {
 typedef struct {
     float latitude;
     float longitude;
-    float speed;
     float altitude;
+    float speed;
     String date;
     String time;
     uint32_t satellites;
@@ -66,7 +66,8 @@ class GPSLib
         uint32_t gpsDebugTimeSerial;
         uint32_t gpsTaskDelayMS;
         gps_t parametersGPS;
-        uint16_t tsSendIntervalGPS = GPS_SEND_INTERVAL;                 // em segundos
+        // uint32_t tsSendIntervalGPS = GPS_SEND_INTERVAL * 1000;                 // em segundos
+        uint32_t tsSendIntervalGPS;                 // em segundos
 
     private:
         float getVBat(void);

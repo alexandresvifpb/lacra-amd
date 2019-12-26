@@ -12,7 +12,7 @@ String addressIdESP = esp32util.getMacAddress();
 boolean connectionOTA = false;
 
 // Serial                                 D:\downloads\doutorado\2019\prototipos\firmwares\lacra-amd\nodes\Node_TTGO-TBeam_SD_GPS_IMU_LoRa_OTA-18
-#define MAIN_MESSAGE_INITIAL            ("D:\\downloads\\doutorado\\2019\\prototipos\\firmwares\\lacra-amd\\nodes\\Node_TTGO-TBeam_SD_GPS_IMU_LoRa_OTA-18.03")          // localizacao do projeto
+#define MAIN_MESSAGE_INITIAL            ("D:\\downloads\\doutorado\\2019\\prototipos\\firmwares\\lacra-amd\\nodes\\Node_TTGO-TBeam_SD_GPS_IMU_LoRa_OTA-18.05")          // localizacao do projeto
 #define MAIN_DEBUG                      (true)         // variavel que habilita (1) ou desabilita (0) o envio de dados pela seria para realizar debug no programa
 #define MAIN_CORE_0                     (0)
 #define MAIN_CORE_1                     (1)
@@ -196,8 +196,11 @@ void TaskLoRa( void * pvParameters ) {
 
             String strMessageSend = esp32util.getNextSendMessage();
 
-            if (lora.loraDebugSend) Serial.println("---> LoraSend");
-            if (lora.loraDebugSend) Serial.println(strMessageSend);
+            // if (lora.loraDebugSend) Serial.println("---> LoraSend");
+            // if (lora.loraDebugSend) Serial.println(strMessageSend);
+
+            // Serial.print("LORA_SEND: ");
+            // Serial.println(strMessageSend);
 
             lora.send(strMessageSend);
             _cont--;
@@ -298,7 +301,8 @@ void TaskGPS( void * pvParameters ) {
         gps.requestSync();
 
     uint16_t gpsTimeLoopSerial = gps.gpsDebugTimeSerial;
-    uint16_t counterSendGPS = gps.tsSendIntervalGPS;
+    // uint16_t counterSendGPS = gps.tsSendIntervalGPS;
+    uint64_t lastSendGPS = millis();
 
     // Loop infinito obrigatorio para manter a Task rodando
     while(true) {
@@ -306,7 +310,7 @@ void TaskGPS( void * pvParameters ) {
         esp_task_wdt_reset();                               // Reseta o contador do watchdog
 
         Serial.println(GPS_DEBUG_MESSAGE);
-        
+
         if (gpsTimeLoopSerial) gpsTimeLoopSerial--;
         else {
             Serial.println(GPS_DEBUG_MESSAGE);
@@ -317,7 +321,8 @@ void TaskGPS( void * pvParameters ) {
 
         if (gps.read() && gps.gpsDebugGetData) Serial.println("---> GPS Read");
 
-        if (gps.avaliable() && counterSendGPS) {
+        // if (gps.avaliable() && counterSendGPS) {
+        if (gps.avaliable()) {
             if (gps.gpsDebugGetData) Serial.println("---> GPS avaliable");
             // String strDataGPS = gps.getDataString(gps.getEpochTime());
             // String strDataGPS = gps.getDataString(esp32util.getEpochTime());
@@ -326,14 +331,20 @@ void TaskGPS( void * pvParameters ) {
             if (gps.gpsDebugGetData) Serial.println(strDataGPS);
             // esp32util.addNewSendMessage(esp32util.encoderJSon(addressIdESP, GPS_TYPE, strDataGPS));
 
-            if (!counterSendGPS) {
+            // if (!counterSendGPS) {
+            if ( (millis() - lastSendGPS) >= gps.tsSendIntervalGPS ) {
+
+                Serial.println("lastSendGPS loop");
+
                 esp32util.addNewSendMessage(esp32util.encoderJSon(addressIdESP, GPS_TYPE, strDataGPS));
+
                 if (sdCard.isSDCardPresent()) {
                     String filename = "/Data_GPS_" + String(year()) + String(month()) + String(day()) + "_" + addressIdESP + ".dat";
                     sdCard.appendFile(SD, filename.c_str(), esp32util.encoderJSon(addressIdESP, GPS_TYPE, strDataGPS).c_str());
                 }
-                counterSendGPS = gps.tsSendIntervalGPS;
+                // counterSendGPS = gps.tsSendIntervalGPS;
                 // counterSendGPS--;
+                lastSendGPS = millis();
             } else if (sdCard.isSDCardPresent() && gps.checkMovement()) {
                 String filename = "/Data_GPS_" + String(year()) + String(month()) + String(day()) + "_" + addressIdESP + ".dat";
                 sdCard.appendFile(SD, filename.c_str(), esp32util.encoderJSon(addressIdESP, GPS_TYPE, strDataGPS).c_str());
@@ -341,7 +352,12 @@ void TaskGPS( void * pvParameters ) {
             }
 
             // counterSendGPS = gps.tsSendIntervalGPS;
-            counterSendGPS--;
+            // counterSendGPS--;
+
+            // Serial.print("counterSendGPS: ");
+            // Serial.println(counterSendGPS);
+
+            Serial.println("GPS loop");
         }
 
         if (gps.gpsDebugGetData) Serial.println(gps.gpsTaskDelayMS);

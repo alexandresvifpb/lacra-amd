@@ -44,6 +44,7 @@ boolean GPSLib::begin(void) {
     gpsDebugGetData = GPS_DEBUG_GETDATA;
     gpsTaskDelayMS = GPS_TASK_DELAY_MS;
     gpsDebugTimeSerial = GPS_DEBUG_TIME_SERIAL/gpsTaskDelayMS;
+    tsSendIntervalGPS = GPS_SEND_INTERVAL * 1000;
 
     return result;
 }

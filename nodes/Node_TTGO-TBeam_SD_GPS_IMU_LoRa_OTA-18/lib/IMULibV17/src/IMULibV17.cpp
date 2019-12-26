@@ -41,49 +41,6 @@ bool IMULib::begin(void) {
     return true;
 }
 
-/*
-// 
-// Inputs: nenhum
-// Return: 
-void IMULib::run(void) {
-    if (millis() - tsLastReport > ACGYMG_REPORTING_PERIOD_MS) {
-
-        // read the sensor
-        if (IMU.readSensor() > 0) {
-
-            // Serial.println(IMU.getAccelX_mss);
-
-            if ((abs(valuesIMU.accelX - IMU.getAccelX_mss()) > dataAccelDif) ||
-                (abs(valuesIMU.accelY - IMU.getAccelY_mss()) > dataAccelDif) ||
-                (abs(valuesIMU.accelZ - IMU.getAccelZ_mss()) > dataAccelDif) )  {
-
-            newValuesIMU = true;
-
-                }
-
-
-            if (newValuesIMU) {
-                valuesIMU.accelX = IMU.getAccelX_mss();
-                valuesIMU.accelY = IMU.getAccelY_mss();
-                valuesIMU.accelZ = IMU.getAccelZ_mss();
-
-                valuesIMU.gyroX = IMU.getGyroX_rads();
-                valuesIMU.gyroY = IMU.getGyroY_rads();
-                valuesIMU.gyroZ = IMU.getGyroZ_rads();
-
-                valuesIMU.magX = IMU.getMagX_uT();
-                valuesIMU.magY = IMU.getMagY_uT();
-                valuesIMU.magZ = IMU.getMagZ_uT();
-
-                valuesIMU.temperature_c = IMU.getTemperature_C();
-            }
-        }
-
-        tsLastReport = millis();
-    }
-}
-*/
-
 // 
 // Inputs: nenhum
 // Return: 

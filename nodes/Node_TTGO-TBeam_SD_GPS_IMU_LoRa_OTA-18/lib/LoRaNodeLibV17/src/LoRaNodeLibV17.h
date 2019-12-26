@@ -50,7 +50,7 @@ class LoRaNodeLib
         void setEpochTime(time_t epochTime);
 
         boolean loraDebugMain;
-        boolean loraDebugSend;
+        boolean loraDebugSendRecv;
         uint16_t loraDebugTimeSerial;
         uint16_t loraTaskDelayMS;
 

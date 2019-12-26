@@ -20,7 +20,7 @@ extern "C" {
 #define PIN_VBAT                        (35)  // GPIO35 - pino para leitura da Vpp da bateria
 
 #define ACGYMG_REPORTING_PERIOD_MS      (20)
-#define DATA_ACCEL_DIF                  (0.1)
+#define DATA_ACCEL_DIF                  (0.5)
 
 #define IMU_TASK_DELAY_MS               (50)
 
@@ -66,6 +66,17 @@ class IMULib
         uint64_t    tsLastReport = millis();
         float       dataAccelDif = DATA_ACCEL_DIF;
         const uint8_t vbatPin = PIN_VBAT;
+
+        // float lastAccelX;
+        // float lastAccelY;
+        // float lastAccelZ;
+        // float lastAccelSqrt;
+        // float lastGyroX;
+        // float lastGyroY;
+        // float lastGyroZ;
+        uint16_t lastMagX;
+        uint16_t lastMagY;
+        uint16_t lastMagZ;
 
 };
 
