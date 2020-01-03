@@ -2,10 +2,10 @@
 #include "ArduinoJson.h"
 #include "LinkedList.h"
 #include "TimeLib.h"
-#include <WiFi.h> //lib para configuração do Wifi
-#include <ArduinoOTA.h> //lib do ArduinoOTA 
-#include <ESPmDNS.h> //lib necessária para comunicação network
-#include <WiFiUdp.h> //lib necessária para comunicação network
+#include <WiFi.h>           //lib para configuração do Wifi
+#include <ArduinoOTA.h>     //lib do ArduinoOTA 
+#include <ESPmDNS.h>        //lib necessária para comunicação network
+#include <WiFiUdp.h>        //lib necessária para comunicação network
 
 #ifndef ESP32NODELIBV18_H 
 #define ESP32NODELIBV18_H
@@ -14,7 +14,6 @@
 extern "C" {
 #endif
 
-#define TIME_TYPE                    (7)         // define como sendo modulo do tipo 2 (MPU9255)
 #define GPS_PIN_VBAT                (35)        // GPIO35 - pino para leitura da Vpp da bateria
 
 #define ESP32_DEBUG_MAIN            (true)
@@ -56,19 +55,16 @@ class ESP32NodeLib
         String getMacAddress(void);
         float getVBat(void);
 
-        boolean esp32DebugMain = ESP32_DEBUG_MAIN;
-        boolean esp32DebugAdd = ESP32_DEBUG_ADD;
-        boolean esp32DebugGet = ESP32_DEBUG_GET;
-
+        // const int UTC_offset = ESP32_UTC_OFFSET;
+        uint64_t timeTaskDelayMS = ESP32_TIME_DELAY;
         boolean connectedOTA = false;
 
-        const int UTC_offset = ESP32_UTC_OFFSET;
-        uint64_t timeTaskDelayMS = ESP32_TIME_DELAY;
-
     private:
+        // boolean esp32DebugMain = ESP32_DEBUG_MAIN;
+        boolean esp32DebugAdd = ESP32_DEBUG_ADD;
+        boolean esp32DebugGet = ESP32_DEBUG_GET;
         const uint8_t vbatPin = GPS_PIN_VBAT;
         String hostname;
-
 
 };
 

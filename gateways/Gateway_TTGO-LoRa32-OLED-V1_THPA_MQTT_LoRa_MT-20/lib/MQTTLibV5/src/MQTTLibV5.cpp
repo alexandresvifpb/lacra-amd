@@ -47,6 +47,11 @@ boolean MQTTLib::begin(void) {
 
         timeClient.begin();
 
+        while( !timeClient.update() )
+        {
+            timeClient.forceUpdate();
+        }
+
         mqttDebugMain = MQTT_DEBUG_MAIN;
         mqttDebugBegin = MQTT_DEBUG_BEGIN;
         mqttDebugLoop = MQTT_DEBUG_LOOP;

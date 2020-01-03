@@ -1,22 +1,24 @@
-// #include <Arduino.h>
-#include "ESP32NodeLibV18.h"
+#include <Arduino.h>
 #include "esp_task.h"
 #include "esp_task_wdt.h"
 
 //===========================================
 //  ESP32 Util
+#include "ESP32NodeLibV19.h"
 
-// ESP32NodeLib esp32util = ESP32NodeLib();
 ESP32NodeLib esp32util;
 String addressIdESP = esp32util.getMacAddress();
+Config_t config;                                        // vai ser usado para configurar as variaveis de intervalo das task usando um arquivo no sdcard ou na memoria flash
 boolean connectionOTA = false;
+allDatas_t allDatas;
+boolean validDateTime = false;                          // indica que o epochtime utilizado nos registro foi validado por acesso ao servidor NTP ou pelo GPS
 
-// Serial                                 D:\downloads\doutorado\2019\prototipos\firmwares\lacra-amd\nodes\Node_TTGO-TBeam_SD_GPS_IMU_LoRa_OTA-18
-#define MAIN_MESSAGE_INITIAL            ("D:\\downloads\\doutorado\\2019\\prototipos\\firmwares\\lacra-amd\\nodes\\Node_TTGO-TBeam_SD_GPS_IMU_LoRa_OTA-18.05")          // localizacao do projeto
-#define MAIN_DEBUG                      (true)         // variavel que habilita (1) ou desabilita (0) o envio de dados pela seria para realizar debug no programa
+// Serial                                 D:\downloads\doutorado\2019\prototipos\firmwares\lacra-amd\nodes\Node_TTGO-TBeam_SD_GPS_IMU-DMP_LoRa_OTA-19
+#define MAIN_MESSAGE_INITIAL            ("D:\\downloads\\doutorado\\2019\\prototipos\\firmwares\\lacra-amd\\nodes\\Node_TTGO-TBeam_SD_GPS_IMU-DMP_LoRa_OTA-19.04")          // localizacao do projeto
+#define MAIN_DEBUG                      (true)          // variavel que habilita (1) ou desabilita (0) o envio de dados pela seria para realizar debug no programa
 #define MAIN_CORE_0                     (0)
 #define MAIN_CORE_1                     (1)
-#define MAIN_WATCHDOC_TIME_OUT          (600)            // Tempo de espera do watchdog para reiniciar o processo
+#define MAIN_WATCHDOC_TIME_OUT          (600)           // Tempo de espera do watchdog para reiniciar o processo
 
 TaskHandle_t TaskIdSDCard;
 TaskHandle_t TaskIdLoRa;
@@ -32,7 +34,7 @@ void TaskTime( void * pvParameters );
 
 //===========================================
 //  SD Card
-#include "SDCardLibV17.h"
+#include "SDCardLibV19.h"
 
 SDCardLib sdCard;
 boolean isActiveSDCard = false;
@@ -47,19 +49,21 @@ boolean isActiveLoRa = false;
 
 //===========================================
 //  GPS NEO6MV2
-#include "GPSLibV18.h"
+#include "GPSLibV19.h"
 
 GPSLib gps;
 boolean isActiveGPS = false;
 
 //===========================================
 //  Accelerometer & Gyroscope & Magnetometer MPU9255 (GY-91) 10DOF
-#include "IMULibV18.h"
+#include "IMULibV19.h"
 
-// IMULib imu = IMULib();
-IMULib imu;
-String strParametersIMU;
+IMULib sensorIMU;
 boolean isActiveIMU = false;
+String strParametersIMU;
+int numberOfRegisterIMU;
+boolean sendDataForLoraIMU = false;
+EulerAngles_t lastDatasEulerAngles, _datasEulerAngles;
 
 void setup() {
     // Inicializacao da Serial
@@ -70,6 +74,10 @@ void setup() {
 
     connectionOTA = esp32util.begin();
 
+    if (now() > GPS_EPOCH_TIME_2019)
+    {
+        validDateTime = true;
+    }
     //Cria uma Task que executará a funcao TaskTHPA(), com prioridade 1 e rodando no nucleo 0
     xTaskCreatePinnedToCore(
                     TaskSDCard,     // Funcao com o codigo que implenta a Task
@@ -138,12 +146,16 @@ void TaskSDCard( void * pvParameters ) {
     //===========================================
     // SD Card
     isActiveSDCard = sdCard.begin();
-    if (!isActiveSDCard)
+    if (!isActiveSDCard) {
         Serial.println("Error inicializacao do modulo SDcard");
+    }
     else
+    {
         Serial.println("SDCard encontrado!");
+    }
 
     uint16_t sdCardTimeLoopSerial = sdCard.sdDebugTimeSerial;
+    allDatas.id = addressIdESP;
 
     // Loop infinito obrigatorio para manter a Task rodando
     while(true) {
@@ -158,6 +170,7 @@ void TaskSDCard( void * pvParameters ) {
 
         esp_task_wdt_reset();                               // Reseta o contador do watchdog
         vTaskDelay(pdMS_TO_TICKS(sdCard.sdTaskDelayMS));      // Pausa a Tesk e libera o nucleo para a proximo Tesk na fila de prioridade
+        // vTaskDelay(pdMS_TO_TICKS(config.sdTaskDelayMS));      // Pausa a Tesk e libera o nucleo para a proximo Tesk na fila de prioridade
     }
 }
 
@@ -177,8 +190,6 @@ void TaskLoRa( void * pvParameters ) {
 
     uint16_t loraTimeLoopSerial = lora.loraDebugTimeSerial;
 
-    // lora.requestSyncTime();
-        
     // Loop infinito obrigatorio para manter a Task rodando
     while(true) {
 
@@ -195,12 +206,6 @@ void TaskLoRa( void * pvParameters ) {
         while (esp32util.avaliableSendMessage() && _cont) {
 
             String strMessageSend = esp32util.getNextSendMessage();
-
-            // if (lora.loraDebugSend) Serial.println("---> LoraSend");
-            // if (lora.loraDebugSend) Serial.println(strMessageSend);
-
-            // Serial.print("LORA_SEND: ");
-            // Serial.println(strMessageSend);
 
             lora.send(strMessageSend);
             _cont--;
@@ -224,6 +229,11 @@ void TaskLoRa( void * pvParameters ) {
                     strPayload.replace("[","");
                     strPayload.replace("]","");
                     lora.setEpochTime(atol(strPayload.c_str()));
+
+                    if ( now() > GPS_EPOCH_TIME_2019 )
+                    {
+                        validDateTime = true;
+                    }
                 }
                 break;
             
@@ -242,8 +252,8 @@ void TaskLoRa( void * pvParameters ) {
                     String strPayload = msgRecvLoRa.payload;
                     strPayload.replace("[","");
                     strPayload.replace("]","");
-                    if (atol(strPayload.c_str())) imu.sendDataForLora = true;
-                    else imu.sendDataForLora = false;
+                    // if (atol(strPayload.c_str())) imu.sendDataForLora = true;
+                    // else imu.sendDataForLora = false;
                 }
                 break;
             
@@ -284,86 +294,77 @@ void TaskLoRa( void * pvParameters ) {
 
         esp_task_wdt_reset();                               // Reseta o contador do watchdog 
         vTaskDelay(pdMS_TO_TICKS(lora.loraTaskDelayMS));    // Pausa a Tesk e libera o nucleo para a proximo Tesk na fila de prioridade
+        // vTaskDelay(pdMS_TO_TICKS(config.loraTaskDelayMS));    // Pausa a Tesk e libera o nucleo para a proximo Tesk na fila de prioridade
     }
 }
 
 // Funcao que implementa a Task para leitura do GPS
-// Inputs: nenhum
-// Return: nenhum
+// Inputs: void
+// Return: void
 void TaskGPS( void * pvParameters ) {
     esp_task_wdt_add(NULL);         // inicia o watchdogtime da task
-    // disableCore0WDT();              // Desabilita o watchdogtime de hardware do core 0
 
     //===========================================
-    // Inicializacao do modulo GPS
-    isActiveGPS = gps.begin();;
-    if (isActiveGPS)
-        gps.requestSync();
-
-    uint16_t gpsTimeLoopSerial = gps.gpsDebugTimeSerial;
-    // uint16_t counterSendGPS = gps.tsSendIntervalGPS;
-    uint64_t lastSendGPS = millis();
+    // Inicializa o modulo GPS e retorna TRUE se bem sucedido
+    isActiveGPS = gps.begin();
 
     // Loop infinito obrigatorio para manter a Task rodando
-    while(true) {
+    while( true ) {
 
         esp_task_wdt_reset();                               // Reseta o contador do watchdog
 
-        Serial.println(GPS_DEBUG_MESSAGE);
+        // Verifica se o GPS esta ativo
+        if ( isActiveGPS )
+        {
+            // Verifica se ha novos dados no GPS
+            if ( gps.avaliable() )
+            {
+                gps.update();   // recupera os novos dados do gps e salva em currentPosition
 
-        if (gpsTimeLoopSerial) gpsTimeLoopSerial--;
-        else {
-            Serial.println(GPS_DEBUG_MESSAGE);
-            gpsTimeLoopSerial = gps.gpsDebugTimeSerial;
-        }
+                // Sincroniza data e hora utilizando dados do GPS caso ainda não tenha sido sincronizado
+                // utilizando o servidor NTP por meio da conexao WiFi
+                if ( !validDateTime )
+                {
+                    if (gps.requestSync())
+                    {
+                        validDateTime = true;
+                    }
+                } 
 
-        if (gps.gpsDebugGetData) Serial.println("---> GPS");
+                // Atualiza allDatas com a novo localizacao
+                allDatas.epochTimeGPS = now();
+                allDatas.latitude = gps.currentPosition.latitude;
+                allDatas.longitude = gps.currentPosition.longitude;
+                allDatas.altitude = gps.currentPosition.altitude;
+                allDatas.speed = gps.currentPosition.speed;
 
-        if (gps.read() && gps.gpsDebugGetData) Serial.println("---> GPS Read");
+                // Testes para verificar se a necessidade de enviar e salvar uma nova posicao.
+                // Teste 1: Calcula a distancia entre a atual posicao e relacao a anterior e verifica se
+                // essa distancia é superior ao error de acuracia do GPS.
+                // Teste 2: Verifica se o intervalo de tempo entre cada envio de dados foi atingido.
+                if ( (gps.calculateDelta(gps.lastPosition, gps.currentPosition) >= GPS_POSITION_ACCURACY/2) || ( gps.checkTimeInterval() ) )
+                {
+                    String currentPosition = gps.getCurretPosition(allDatas.epochTimeGPS);       // recupera uma string da atual posicao 
+                    
+                    // Adiciona uma nova localizacao na lista a ser enviada pelo modulo LoRa
+                    esp32util.addNewSendMessage(esp32util.encoderJSon(addressIdESP, GPS_TYPE, currentPosition)); 
 
-        // if (gps.avaliable() && counterSendGPS) {
-        if (gps.avaliable()) {
-            if (gps.gpsDebugGetData) Serial.println("---> GPS avaliable");
-            // String strDataGPS = gps.getDataString(gps.getEpochTime());
-            // String strDataGPS = gps.getDataString(esp32util.getEpochTime());
-            
-            String strDataGPS = gps.getDataString(now());
-            if (gps.gpsDebugGetData) Serial.println(strDataGPS);
-            // esp32util.addNewSendMessage(esp32util.encoderJSon(addressIdESP, GPS_TYPE, strDataGPS));
+                    // Verifica se um sdCard esta presente
+                    if ( isActiveSDCard )
+                    {
+                        // Adiciona um novo registro no arquivo "Data_GPS"
+                        String filename = "/Data_GPS_" + String(year()) + String(month()) + String(day()) + "_" + addressIdESP + ".dat";
+                        sdCard.appendFile(SD, filename.c_str(), esp32util.encoderJSon(addressIdESP, GPS_TYPE, currentPosition).c_str());
 
-            // if (!counterSendGPS) {
-            if ( (millis() - lastSendGPS) >= gps.tsSendIntervalGPS ) {
+                        // Adiciona um novo registro no arquivo "Data_ALL"
+                        filename = "/Data_ALL_" + String(year()) + String(month()) + String(day()) + "_" + addressIdESP + ".dat";
+                        sdCard.appendFile(SD, filename.c_str(), esp32util.getAllDatas(allDatas).c_str());
 
-                Serial.println("lastSendGPS loop");
-
-                esp32util.addNewSendMessage(esp32util.encoderJSon(addressIdESP, GPS_TYPE, strDataGPS));
-
-                if (sdCard.isSDCardPresent()) {
-                    String filename = "/Data_GPS_" + String(year()) + String(month()) + String(day()) + "_" + addressIdESP + ".dat";
-                    sdCard.appendFile(SD, filename.c_str(), esp32util.encoderJSon(addressIdESP, GPS_TYPE, strDataGPS).c_str());
+                    }
                 }
-                // counterSendGPS = gps.tsSendIntervalGPS;
-                // counterSendGPS--;
-                lastSendGPS = millis();
-            } else if (sdCard.isSDCardPresent() && gps.checkMovement()) {
-                String filename = "/Data_GPS_" + String(year()) + String(month()) + String(day()) + "_" + addressIdESP + ".dat";
-                sdCard.appendFile(SD, filename.c_str(), esp32util.encoderJSon(addressIdESP, GPS_TYPE, strDataGPS).c_str());
-                // counterSendGPS = gps.tsSendIntervalGPS;
             }
-
-            // counterSendGPS = gps.tsSendIntervalGPS;
-            // counterSendGPS--;
-
-            // Serial.print("counterSendGPS: ");
-            // Serial.println(counterSendGPS);
-
-            Serial.println("GPS loop");
         }
 
-        if (gps.gpsDebugGetData) Serial.println(gps.gpsTaskDelayMS);
-        if (gps.gpsDebugGetData) Serial.println("GPS --->");
-
-        esp_task_wdt_reset();                               // Reseta o contador do watchdog
         vTaskDelay(pdMS_TO_TICKS(gps.gpsTaskDelayMS));      // Pausa a Tesk e libera o nucleo para a proximo Tesk na fila de prioridade
     }
 }
@@ -378,51 +379,81 @@ void TaskIMU( void * pvParameters ) {
     //===========================================
     // Inicializacao do modulo IMU (MPU9250)
     Serial.println("Inicializando sensor IMU.....");
-    if (!imu.begin()) {
+    if (!sensorIMU.begin()) {
         isActiveIMU = false;
     } else {
         isActiveIMU = true;
     }
 
+    // EulerAngles_t lastDatasEulerAngles;
     // Loop infinito obrigatorio para manter a Task rodando
     while(true) {
 
         // IMU
         if (isActiveIMU) {
-            imu.read();
-            if (imu.avaliable()) {
+            
+            if (sensorIMU.avaliable()) {
 
-                strParametersIMU = imu.getStrDataIMU(now());
+                if (sensorIMU.updateDatas()) {
 
-                if (sdCard.isSDCardPresent()) {
-                    // sdCard.appendFile(SD, "/Teste.dat", esp32util.encoderJSon(addressIdESP, IMU_TYPE, strParametersIMU).c_str());
-                    // String filename = "/Data_" + addressIdESP + "_" + year() + month() + day() + ".dat";
-                    String filename = "/Data_IMU_" + String(year()) + String(month()) + String(day()) + "_" + addressIdESP + ".dat";
-                    sdCard.appendFile(SD, filename.c_str(), esp32util.encoderJSon(addressIdESP, IMU_TYPE, strParametersIMU).c_str());
-                    imu.numberOfRegisterIMU++;
+                    IMU_t _datasIMU = sensorIMU.getIMU();
+                    Quaternion_t _datasQuaternion = sensorIMU.getQuaternion();
+                    // EulerAngles_t _datasEulerAngles = sensorIMU.getEulerAngles();
+                    _datasEulerAngles = sensorIMU.getEulerAngles();
+
+                    time_t _epochTimeNow = now();
+                    allDatas.dateTime = String(month(_epochTimeNow)) + "/" + String(day(_epochTimeNow)) + "/" + String(year(_epochTimeNow)) + " " + String(hour(_epochTimeNow)) + ":" + String(minute(_epochTimeNow)) + ":" + String(second(_epochTimeNow));
+                    allDatas.epochTimeIMU = _epochTimeNow;
+                    allDatas.accelX = _datasIMU.accelX;
+                    allDatas.accelY = _datasIMU.accelY;
+                    allDatas.accelZ = _datasIMU.accelZ;
+                    allDatas.gyroX = _datasIMU.gyroX;
+                    allDatas.gyroY = _datasIMU.gyroY;
+                    allDatas.gyroZ = _datasIMU.gyroZ;
+                    allDatas.magX = _datasIMU.magX;
+                    allDatas.magY = _datasIMU.magY;
+                    allDatas.magZ = _datasIMU.magZ;
+                    allDatas.q0 = _datasQuaternion.q0;
+                    allDatas.q1 = _datasQuaternion.q1;
+                    allDatas.q2 = _datasQuaternion.q2;
+                    allDatas.q3 = _datasQuaternion.q3;
+                    allDatas.Yam = _datasEulerAngles.Yam;
+                    allDatas.Pitch = _datasEulerAngles.Pitch;
+                    allDatas.Roll = _datasEulerAngles.Roll;
+
+                    // strParametersIMU = sensorIMU.getStrDatas(now(), _datasIMU, _datasQuaternion, _datasEulerAngles);
+                    strParametersIMU = sensorIMU.getStrDatas(now(), _datasIMU, _datasQuaternion, _datasEulerAngles);
+
+                    boolean _newData = false;
+                    if ((_datasEulerAngles.Yam - lastDatasEulerAngles.Yam) > DATA_YAM_DIF ||
+                        (_datasEulerAngles.Pitch - lastDatasEulerAngles.Pitch) > DATA_PITCH_DIF ||
+                        (_datasEulerAngles.Roll - lastDatasEulerAngles.Roll) > DATA_ROLL_DIF) {
+                            _newData = true;
+                        }
+                    lastDatasEulerAngles = _datasEulerAngles;
+
+                    if (sdCard.isSDCardPresent() && _newData) {
+                        String filename = "/Data_ALL_" + String(year()) + String(month()) + String(day()) + "_" + addressIdESP + ".dat";
+                        sdCard.appendFile(SD, filename.c_str(), esp32util.getAllDatas(allDatas).c_str());
+                        numberOfRegisterIMU++;
+                    }
+
+                    if (sdCard.isSDCardPresent() && _newData) {
+                        String filename = "/Data_IMU_" + String(year()) + String(month()) + String(day()) + "_" + addressIdESP + ".dat";
+                        sdCard.appendFile(SD, filename.c_str(), esp32util.encoderJSon(addressIdESP, IMU_TYPE, strParametersIMU).c_str());
+                        numberOfRegisterIMU++;
+                    }
+
+                    if (isActiveLoRa && sendDataForLoraIMU) {
+                        esp32util.addNewSendMessage(esp32util.encoderJSon(addressIdESP, IMU_TYPE, strParametersIMU));
+                    }
                 }
-
-                if (isActiveLoRa && imu.sendDataForLora) {
-                    esp32util.addNewSendMessage(esp32util.encoderJSon(addressIdESP, IMU_TYPE, strParametersIMU));
-                }
-
-                imu.updateQuartenion(MAHONY_FILTER);
-
-                Serial.print("Pitch: ");
-                Serial.print(imu.getPitch());
-                Serial.print("\t");
-
-                Serial.print("Roll: ");
-                Serial.print(imu.getRoll());
-                Serial.print("\t");
-
-                Serial.print("Roll: ");
-                Serial.println(imu.getYaw());
-            } 
+            }
         }
 
         esp_task_wdt_reset();                               // Reseta o contador do watchdog
-        vTaskDelay(pdMS_TO_TICKS(imu.IMUTaskDelayMS));      // Pausa a Tesk e libera o nucleo para a proximo Tesk na fila de prioridade
+        vTaskDelay(pdMS_TO_TICKS(sensorIMU.imuTaskDelayMS));      // Pausa a Tesk e libera o nucleo para a proximo Tesk na fila de prioridade
+        // vTaskDelay(pdMS_TO_TICKS(config.imuTaskDelayMS));      // Pausa a Tesk e libera o nucleo para a proximo Tesk na fila de prioridade
     }
 }
 
@@ -440,7 +471,7 @@ void TaskTime( void * pvParameters ) {
             msg5min = "[";
             msg5min += now();
             msg5min += ",";
-            msg5min += String((unsigned long)imu.numberOfRegisterIMU);
+            msg5min += String((unsigned long)numberOfRegisterIMU);
             msg5min += ",";
             msg5min += esp32util.getVBat();
             msg5min += "]";
@@ -451,6 +482,7 @@ void TaskTime( void * pvParameters ) {
             // Serial.println("TaskTime #1");
 
             // esp32util.addNewSendMessage(esp32util.encoderJSon(addressIdESP, 7, String((unsigned long)imu.numberOfRegisterIMU)));
+            // esp32util.addNewSendMessage(esp32util.encoderJSon(addressIdESP, 7, String((unsigned long)numberOfRegisterIMU)));
             esp32util.addNewSendMessage(esp32util.encoderJSon(addressIdESP, 7, msg5min));
 
         }
@@ -464,8 +496,9 @@ void TaskTime( void * pvParameters ) {
         // }
 
         esp_task_wdt_reset();                               // Reseta o contador do watchdog
+        // vTaskDelay(pdMS_TO_TICKS(120000));      // Pausa a Tesk e libera o nucleo para a proximo Tesk na fila de prioridade (milisegundos)
         vTaskDelay(pdMS_TO_TICKS(esp32util.timeTaskDelayMS));      // Pausa a Tesk e libera o nucleo para a proximo Tesk na fila de prioridade (milisegundos)
-        // vTaskDelay(pdMS_TO_TICKS(10000));      // Pausa a Tesk e libera o nucleo para a proximo Tesk na fila de prioridade (milisegundos)
+        // vTaskDelay(pdMS_TO_TICKS(config.timeTaskDelayMS));      // Pausa a Tesk e libera o nucleo para a proximo Tesk na fila de prioridade (milisegundos)
     }
 }
 
