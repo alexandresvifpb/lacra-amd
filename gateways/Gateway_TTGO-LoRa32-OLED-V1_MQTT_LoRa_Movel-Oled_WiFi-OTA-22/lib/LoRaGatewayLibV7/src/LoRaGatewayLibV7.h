@@ -2,8 +2,8 @@
 #include <ArduinoJson.h>
 #include "LoRa.h"
 
-#ifndef LORAGATEWAYLIBV6_H 
-#define LORAGATEWAYLIBV6_H
+#ifndef LORAGATEWAYLIBV7_H 
+#define LORAGATEWAYLIBV7_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,4 +66,4 @@ class LoRaGatewayLib
 }
 #endif
 
-#endif  // LORAGATEWAYLIBV6_H
+#endif  // LORAGATEWAYLIBV7_H

@@ -109,7 +109,7 @@ void setup()
     //Cria uma Task que executará a funcao TaskTHPA(), com prioridade 1 e rodando no nucleo 0
     xTaskCreatePinnedToCore(
                     TaskWiFiOTA,     // Funcao com o codigo que implenta a Task
-                    "TaskSDCard",   // Nome da Task
+                    "TaskWiFiOTA",   // Nome da Task
                     4096,           // Tamanho da pilha (stack) a serem alocada na criacao da Task
                     NULL,           // Parametros de entrada da Task
                     1,              // Prioridade da Task

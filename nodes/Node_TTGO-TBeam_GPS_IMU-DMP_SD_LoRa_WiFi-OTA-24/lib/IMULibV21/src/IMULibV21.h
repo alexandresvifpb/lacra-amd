@@ -1,7 +1,7 @@
-#include <SparkFunMPU9250-DMP.h>
+#ifndef IMULIBV21_H
+#define IMULIBV21_H
 
-#ifndef IMULIBV20_H
-#define IMULIBV20_H
+#include <SparkFunMPU9250-DMP.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,7 +17,6 @@ extern "C" {
 #define MPU_MPU9250_ADDRESS             (0x68)      // Device address when ADO = 0
 #define MPU_PIN_SDA                     (21)        //(36)     //(GPIO_NUM_10)
 #define MPU_PIN_SCL                     (22)        //(39)     //(GPIO_NUM_9)
-#define PIN_VBAT                        (35)        // GPIO35 - pino para leitura da Vpp da bateria
 
 #define ACGYMG_REPORTING_PERIOD_MS      (20)
 #define DATA_ACCEL_DIF                  (0.2)
@@ -25,8 +24,7 @@ extern "C" {
 #define DATA_PITCH_DIF                  (0.2)
 #define DATA_ROLL_DIF                   (0.2)
 
-#define IMU_TASK_DELAY_MS               (10)
-#define IMU_SEND_LOOP_DELAY_S           (120)
+#define IMU_TASK_DELAY_MS               (190)
 
 #define MADGWICK_FILTER                 (0)         // MadgwickQuaternionUpdate()
 #define MAHONY_FILTER                   (1)         // MahonyQuaternionUpdate()
@@ -95,18 +93,19 @@ class IMULib
         IMU_t getIMU(void);
         Quaternion_t getQuaternion(void);
         EulerAngles_t getEulerAngles(void);
-        EulerAngles_t toEulerianAngle(Quaternion_t quaternion);
+        EulerAngles_t getEulerianAngle(Quaternion_t quaternion);
 
-        String getStrDatas(uint64_t unixTime, IMU_t datasIMU);
-        String getStrDatas(uint64_t unixTime, Quaternion_t datasQuaternion);
-        String getStrDatas(uint64_t unixTime, EulerAngles_t datasEulerAngles);
-        String getStrDatas(uint64_t unixTime, IMU_t datasIMU, Quaternion_t datasQuaternion);
-        String getStrDatas(uint64_t unixTime, IMU_t datasIMU, EulerAngles_t datasEulerAngles);
-        String getStrDatas(uint64_t unixTime, Quaternion_t datasQuaternion, EulerAngles_t datasEulerAngles);
-        String getStrDatas(uint64_t unixTime, IMU_t datasIMU, Quaternion_t datasQuaternion, EulerAngles_t datasEulerAngles);
+        String getStringDatas(uint64_t unixTime, uint16_t bootsequence);
 
-        uint32_t imuTaskDelayMS;
-        uint32_t imuSendLoopDelayS;
+        // String getStrDatas(uint64_t unixTime, Quaternion_t datasQuaternion);
+        // String getStrDatas(uint64_t unixTime, EulerAngles_t datasEulerAngles);
+        // String getStrDatas(uint64_t unixTime, IMU_t datasIMU, Quaternion_t datasQuaternion);
+        // String getStrDatas(uint64_t unixTime, IMU_t datasIMU, EulerAngles_t datasEulerAngles);
+        // String getStrDatas(uint64_t unixTime, Quaternion_t datasQuaternion, EulerAngles_t datasEulerAngles);
+        // String getStrDatas(uint64_t unixTime, IMU_t datasIMU, Quaternion_t datasQuaternion, EulerAngles_t datasEulerAngles);
+
+        uint32_t tsIMUTaskDelayMS = IMU_TASK_DELAY_MS;
+        // uint32_t imuSendLoopDelayS;
 
     private:
 
@@ -119,4 +118,4 @@ class IMULib
 }
 #endif
 
-#endif /* IMULIBV20_H */
+#endif /* IMULIBV21_H */

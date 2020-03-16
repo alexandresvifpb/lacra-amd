@@ -1,4 +1,4 @@
-#include "ESP32NodeLibV21.h"
+#include "EPS32GatewayLibV1.h"
 
 uint16_t getFlashUInt16(uint8_t address);
 void setFlashUInt16(uint8_t address, uint16_t value);
@@ -6,13 +6,17 @@ void setFlashUInt16(uint8_t address, uint16_t value);
 // struct tm data;//Cria a estrutura que contem as informacoes da data.
 struct timeval data;          //Cria a estrutura que contem as informacoes da data.
 
+//======================
+// Funcoes Public
+//======================
+
 // Funcao construtor da classe ESP32Lib
-ESP32NodeLib::ESP32NodeLib() {}
+ESP32GatewayLib::ESP32GatewayLib() {}
 
 // Utiliza o MAC do modulo ESP32 para gerar um ID do modulo
 // Input: nenhum
 // Return: String - formada com parte do MAC (3 bytes) do modulo
-String ESP32NodeLib::getIdModule(void) {
+String ESP32GatewayLib::getIdModule(void) {
     char chipID_0[4];
     char chipID_1[4];
     char chipID_2[4];
@@ -38,7 +42,7 @@ String ESP32NodeLib::getIdModule(void) {
 // Seta a data e hora no RTC interno do ESP32 
 // Inputs: unsigned long - valor unix time para a data hora atual
 // Return: void
-unsigned long ESP32NodeLib::getUnixTimeNow(void)
+unsigned long ESP32GatewayLib::getUnixTimeNow(void)
 {
 
     return now();
@@ -51,7 +55,7 @@ unsigned long ESP32NodeLib::getUnixTimeNow(void)
 // Seta a data e hora no RTC interno do ESP32 
 // Inputs: unsigned long - valor unix time para a data hora atual
 // Return: void
-void ESP32NodeLib::setUnixTime(unsigned long unixTime)
+void ESP32GatewayLib::setUnixTime(unsigned long unixTime)
 {
     // setTime( unixTime );
 
@@ -63,7 +67,7 @@ void ESP32NodeLib::setUnixTime(unsigned long unixTime)
 // Seta a data e hora no RTC interno do ESP32 
 // Inputs: unsigned long - valor unix time para a data hora atual
 // Return: void
-boolean ESP32NodeLib::isValidUnixTime(uint64_t currentUnixTime)
+boolean ESP32GatewayLib::isValidUnixTime(uint64_t currentUnixTime)
 {
     if ( (currentUnixTime > minUnixTime) && (currentUnixTime < maxUnixTime) )
     {    
@@ -80,7 +84,7 @@ boolean ESP32NodeLib::isValidUnixTime(uint64_t currentUnixTime)
 //          uint8_t type - tipo do dados a ser salvo
 //          String payload - dados a ser salvo
 // Return: String retorna uma string com os dados codificado em JSON
-String ESP32NodeLib::encoderJSon(String id, uint8_t type, String payload) {
+String ESP32GatewayLib::encoderJSon(String id, uint8_t type, String payload) {
 
     String _strJSON;
 
@@ -103,13 +107,8 @@ String ESP32NodeLib::encoderJSon(String id, uint8_t type, String payload) {
 // 
 // Inputs: Config_t
 // Return: String
-String ESP32NodeLib::encoderStrAllDatas(allDatas_t datas) {
+String ESP32GatewayLib::encoderStrConfigs(configs_t datas) {
     String rest;
-    char cLatitudeTemp[10];
-    sprintf(cLatitudeTemp, "%f", datas.latitude);
-
-    char cLongitudeTemp[20];
-    sprintf(cLongitudeTemp, "%f", datas.longitude);
 
     rest = "[";
     rest += datas.id;
@@ -117,48 +116,6 @@ String ESP32NodeLib::encoderStrAllDatas(allDatas_t datas) {
     rest += datas.dateTime;
     rest += ";";
     rest += (unsigned long)datas.epochTimeIMU;
-    rest += ";";
-    rest += datas.accelX;
-    rest += ";";
-    rest += datas.accelY;
-    rest += ";";
-    rest += datas.accelZ;
-    rest += ";";
-    rest += datas.gyroX;
-    rest += ";";
-    rest += datas.gyroY;
-    rest += ";";
-    rest += datas.gyroZ;
-    rest += ";";
-    rest += datas.magX;
-    rest += ";";
-    rest += datas.magY;
-    rest += ";";
-    rest += datas.magZ;
-    rest += ";";
-    rest += datas.q0;
-    rest += ";";
-    rest += datas.q1;
-    rest += ";";
-    rest += datas.q2;
-    rest += ";";
-    rest += datas.q3;
-    rest += ";";
-    rest += datas.Yaw;
-    rest += ";";
-    rest += datas.Pitch;
-    rest += ";";
-    rest += datas.Roll;
-    rest += ";";
-    rest += (unsigned long)datas.epochTimeGPS;
-    rest += ";";
-    rest += cLatitudeTemp;
-    rest += ";";
-    rest += cLongitudeTemp;
-    rest += ";";
-    rest += datas.altitude;
-    rest += ";";
-    rest += datas.speed;
     rest += ";";
     rest += datas.bootSequence;
     rest += ";";
@@ -173,7 +130,7 @@ String ESP32NodeLib::encoderStrAllDatas(allDatas_t datas) {
 //
 // Inputs:  String id - endereco do dispositivo
 // Return: String retorna uma string com os dados codificado em JSON
-commands_t ESP32NodeLib::getCommand(String sentence) {
+commands_t ESP32GatewayLib::getCommand(String sentence) {
 
     commands_t _result;
     _result.type = 0;
@@ -204,7 +161,7 @@ commands_t ESP32NodeLib::getCommand(String sentence) {
 //
 // Inputs:  String id - endereco do dispositivo
 // Return: String retorna uma string com os dados codificado em JSON
-uint16_t ESP32NodeLib::getBootSequence(void) 
+uint16_t ESP32GatewayLib::getBootSequence(void) 
 {
     if ( RESET_CONT_BOOT )
     {
