@@ -3,6 +3,7 @@
 MPU9250_DMP imu;
 
 boolean newDatasAvaliable = false;
+LinkedList<EulerAngles_t> listEulerAngles = LinkedList<EulerAngles_t>();
 
 IMULib::IMULib() {}
 
@@ -123,7 +124,7 @@ Quaternion_t IMULib::getQuaternion(void) {
 }
 
 // 
-EulerAngles_t IMULib::getEulerianAngle(Quaternion_t quaternion) {
+EulerAngles_t IMULib::getEulerAngles(Quaternion_t quaternion) {
     EulerAngles_t eulerAngles;
 
     // double ysqr = y * y;
@@ -164,11 +165,17 @@ EulerAngles_t IMULib::getEulerianAngle(Quaternion_t quaternion) {
     return eulerAngles;
 }
 
+//
+uint8_t IMULib::addEulerAngleList(EulerAngles_t eulerAngle) {
+    listEulerAngles.add(eulerAngle);
+    return listEulerAngles.size();
+}
+
 // 
 String IMULib::getStringDatas(uint64_t unixTime, uint16_t bootsequence) {
     IMU_t datasIMU = getIMU();
     Quaternion_t datasQuaternion = getQuaternion();
-    EulerAngles_t datasEulerAngles = getEulerianAngle(datasQuaternion);
+    EulerAngles_t datasEulerAngle = getEulerAngles(datasQuaternion);
 
     String result = String((unsigned long)unixTime);
     result += ",";
@@ -178,7 +185,24 @@ String IMULib::getStringDatas(uint64_t unixTime, uint16_t bootsequence) {
     result += ",";
     result += getStrQuaternion(datasQuaternion);
     result += ",";
-    result += getStrEulerAngles(datasEulerAngles);
+    result += getStrEulerAngles(datasEulerAngle);
+    return result;
+}
+
+// 
+String IMULib::getStringEADatas(uint64_t unixTime, uint16_t bootsequence) {
+
+    String result = String((unsigned long)unixTime);
+    result += ",";
+    result += bootsequence;
+    result += ",";
+
+    while ( listEulerAngles.size() ) {
+        EulerAngles_t datasEulerAngle = listEulerAngles.remove(0);
+        result += ",";
+        result += getStrEulerAngles(datasEulerAngle);
+    }
+    
     return result;
 }
 

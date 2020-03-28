@@ -2,6 +2,7 @@
 
 LinkedList<String> listRecvMessage = LinkedList<String>();
 LinkedList<recordFormatLoRa_t> listSendRecord = LinkedList<recordFormatLoRa_t>();
+LinkedList<recordFormatLoRa_t> listRecvRecord = LinkedList<recordFormatLoRa_t>();
 uint8_t synWord = LORA_SYN_WORD;
 
 LoRaNodeLib::LoRaNodeLib() {}
@@ -30,21 +31,11 @@ boolean LoRaNodeLib::begin(void) {
 
 //
 void LoRaNodeLib::run(void) {
-
     while ( listSendRecord.size() > 0 ) {
         recordFormatLoRa_t record = listSendRecord.remove(0);
         send( encodeJSON(record) );
         delay(100);
     }
-
-    // if ( millis() >  (tsLoRaDelaySendRecord + lastSendTime) ) {
-    //     while ( listSendRecord.size() > 0 ) {
-    //         recordFormatLoRa_t record = listSendRecord.remove(0);
-    //         send( encodeJSON(record) );
-    //         delay(100);
-    //     }
-    // }
-
 }
 
 //
@@ -90,24 +81,9 @@ String LoRaNodeLib::getStrRecv(void) {
     return listRecvMessage.remove(0);
 }
 
-// Converte um messageLoRa_t em uma estrutura String
-String LoRaNodeLib::encodeJSON(recordFormatLoRa_t msgSend) {
-
-    String _strJSON;
-
-    StaticJsonDocument<256> doc;
-
-    JsonObject root = doc.to<JsonObject>();
-
-    root["id"] = msgSend.id;
-    root["type"] = msgSend.type;
-    root["payload"] = msgSend.payload;
-
-    if (serializeJson(doc, _strJSON) == 0) {
-        Serial.println(F("Failed to write to file"));
-    }
-
-    return _strJSON;
+// 
+recordFormatLoRa_t LoRaNodeLib::getRecv(void) {
+    return listRecvRecord.remove(0);
 }
 
 // Automatically executed every time the LoRa module receives a new message
@@ -136,4 +112,51 @@ void LoRaNodeLib::SetRxMode(void) {
 void LoRaNodeLib::SetTxMode(void) {
     LoRa.idle();                          // set standby mode
     LoRa.disableInvertIQ();               // normal mode
+}
+
+// Convert a messageLoRa_t to a String structure
+String LoRaNodeLib::encodeJSON(recordFormatLoRa_t msgSend) {
+
+    String _strJSON;
+
+    StaticJsonDocument<256> doc;
+
+    JsonObject root = doc.to<JsonObject>();
+
+    root["id"] = msgSend.id;
+    root["type"] = msgSend.type;
+    root["payload"] = msgSend.payload;
+
+    if (serializeJson(doc, _strJSON) == 0) {
+        Serial.println(F("Failed to write to file"));
+    }
+
+    return _strJSON;
+}
+
+// Converts a String to a recordFormatLoRa_t structure
+recordFormatLoRa_t LoRaNodeLib::decodeJSON(String strJSONRecv) {
+    recordFormatLoRa_t _message;
+
+    StaticJsonDocument<200> doc;
+
+    DeserializationError error = deserializeJson(doc, strJSONRecv);
+
+    if (error) {
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.c_str());
+        return _message;
+    }
+
+    JsonObject root = doc.as<JsonObject>();
+
+    String id = root["id"];
+    uint8_t type = root["type"];
+    String payload = root["payload"];
+
+    _message.id = id;
+    _message.type = type;
+    _message.payload = payload;
+
+    return _message;
 }

@@ -21,6 +21,7 @@ extern "C" {
 #define WEB_SERVER_PORT                 (23)    // ServerPort
 
 #define WIFIOTA_TASK_DELAY_MS           (1000)
+#define WIFIOTA_HIBERNATION_TIME        (60000)
 
 class WiFiOTALib
 {
@@ -41,6 +42,7 @@ class WiFiOTALib
         boolean initSTA(void);
         boolean isConnectedSTA(void);
         void disconnectSTA(void);
+        boolean checkConnection(void);
 
         // // OTA
         boolean activeOTA(void);

@@ -2,6 +2,7 @@
 #define IMULIBV21_H
 
 #include <SparkFunMPU9250-DMP.h>
+#include "LinkedList.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -92,10 +93,12 @@ class IMULib
 
         IMU_t getIMU(void);
         Quaternion_t getQuaternion(void);
-        EulerAngles_t getEulerAngles(void);
-        EulerAngles_t getEulerianAngle(Quaternion_t quaternion);
-
+        // EulerAngles_t getEulerAngles(void);
+        EulerAngles_t getEulerAngles(Quaternion_t quaternion);
+        uint8_t addEulerAngleList(EulerAngles_t eulerAngle);
         String getStringDatas(uint64_t unixTime, uint16_t bootsequence);
+        String getStringEADatas(uint64_t unixTime, uint16_t bootsequence);
+
 
         // String getStrDatas(uint64_t unixTime, Quaternion_t datasQuaternion);
         // String getStrDatas(uint64_t unixTime, EulerAngles_t datasEulerAngles);

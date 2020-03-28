@@ -3,6 +3,10 @@
 uint16_t getFlashUInt16(uint8_t address);
 void setFlashUInt16(uint8_t address, uint16_t value);
 unsigned long timeLocal;
+const int vBatPin = VBAT_PIN;
+uint8_t counterToEnterModeDeepSleep = 0;
+
+esp_adc_cal_characteristics_t adc_cal;
 
 // function constructor of the class ESP32Lib
 ESP32NodeLib::ESP32NodeLib() {}
@@ -67,6 +71,38 @@ boolean ESP32NodeLib::isValidUnixTime(uint64_t currentUnixTime) {
     boolean rest = false;
     ( (currentUnixTime > minUnixTime) && (currentUnixTime < maxUnixTime) ) ? rest = true : rest = false;
     return rest;
+}
+
+//
+float ESP32NodeLib::getVBat(void) {
+    // uint16_t vBat = analogRead(vBatPin);
+    // float vBat1 = ( float(vBat) / 4095.0 ) * 20.0;
+
+    // Serial.print("VBat: ");
+    // Serial.println(vBat);
+
+    // Serial.print("VBat1: ");
+    // Serial.println(vBat1);
+
+    // return vBat;
+
+    return ( float(analogRead(vBatPin)) / 4095.0 ) * 20.0;
+}
+
+//
+boolean ESP32NodeLib::checkBattery(void) {
+    counterToEnterModeDeepSleep++;
+    ( getVBat() < MINIMUM_BATTERY_VOLTAGE) ? counterToEnterModeDeepSleep++: counterToEnterModeDeepSleep = 0;
+
+    if ( counterToEnterModeDeepSleep > 10 ) {
+        Serial.print("esp_deep_sleep_start()");
+        esp_deep_sleep_start();
+        return true;
+    } else {
+        Serial.print("counterToEnterModeDeepSleep: ");
+        Serial.println(counterToEnterModeDeepSleep);
+        return false;
+    }
 }
 
 // Read from flash memory

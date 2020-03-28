@@ -161,7 +161,7 @@ void TaskLoRa( void * pvParameters ) {
                 recordFormatLoRa_t newRecordLoRa;
                 newRecordLoRa.id = addressIdESP;
                 // newRecordLoRa.type = TYPE_GPS;
-                newRecordLoRa.type = 9;
+                newRecordLoRa.type = 8;
                 newRecordLoRa.payload = String((unsigned long)module.getUnixTimeNow());
                 newRecordLoRa.payload += ',';
                 newRecordLoRa.payload += bootSequence;
@@ -172,6 +172,27 @@ void TaskLoRa( void * pvParameters ) {
                 newRecordLoRa.payload += ',';
                 newRecordLoRa.payload += recordCounterIMU;
                 lora.addRecordToSend(newRecordLoRa);
+                wifi.printClientWS(newRecordLoRa.payload);
+                // module.getVBat();
+                // if ( module.getVBat() < 7.00 ) esp_deep_sleep_start();
+                module.checkBattery();
+            }
+
+            if ( lora.isReceived() ) {
+                recordFormatLoRa_t messageRecvLoRa = lora.getRecv();
+                if ( messageRecvLoRa.id == addressIdESP ) {
+                    switch ( messageRecvLoRa.type )
+                    {
+                    case TYPE_RECV_COMMAND_RESET:
+                        esp_task_wdt_init(1, true);
+                        esp_task_wdt_add(NULL);
+                        while(true);
+                        break;
+                    
+                    default:
+                        break;
+                    }
+                }
             }
         }
 
@@ -189,13 +210,15 @@ void TaskWiFiOTA( void * pvParameters ) {
     ( !enabledWiFiOTA ) ? Serial.println("Error initializing the WiFi") : Serial.println("WiFi OK!");
 
     wifi.setMACAddress(addressIdESP);
+    uint64_t lastHibernationTime = -WIFIOTA_HIBERNATION_TIME;
 
     // Mandatory infinite loop to keep the Task running
     while(true) {
         isConnectedSTA = wifi.isConnectedSTA();
 
-        if ( !isConnectedSTA ) {
+        if ( !isConnectedSTA && ( millis() > lastHibernationTime + WIFIOTA_HIBERNATION_TIME ) ) {
             isConnectedSTA = wifi.initSTA();
+            lastHibernationTime = millis();
         }
         
         if ( isConnectedSTA && !isConnectedOTA ) {
@@ -232,6 +255,8 @@ void TaskWiFiOTA( void * pvParameters ) {
         if ( wifi.availableClientWS() > 0 ) {
             Serial.println("WIFI_INFO: Client connected");
         }
+
+        wifi.checkConnection();
 
         esp_task_wdt_reset();                                           // Reset watchdog counter
         vTaskDelay(pdMS_TO_TICKS(wifi.tsWiFiNodeOTATaskDelayMS));       // Pause Tesk and release the nucleus for the next Tesk in the priority queue
@@ -307,6 +332,7 @@ void TaskGPS( void * pvParameters ) {
                 recordCounterGPS++;
 
                 Serial.println(stringDatasGPS);
+                // module.getVBat();
             }
         }
 
@@ -331,15 +357,22 @@ void TaskIMU( void * pvParameters ) {
                 if ( sensorIMU.updateDatas() ) {
 
                     recordFormatSDCard_t newRecordIMU;
-                    time_t epochTimeNow = module.getUnixTimeNow();
-                    stringDatasIMU = sensorIMU.getStringDatas(epochTimeNow, bootSequence);
+                    time_t unixTimeNow = module.getUnixTimeNow();
+                    stringDatasIMU = sensorIMU.getStringDatas(unixTimeNow, bootSequence);
 
                     newRecordIMU.id = addressIdESP;
                     newRecordIMU.bootSequence = bootSequence;
                     newRecordIMU.type = TYPE_IMU;
                     newRecordIMU.payload = stringDatasIMU;
 
-                    if ( sdCard.isSDCardPresent() ) sdCard.addRecord(newRecordIMU);
+                    if ( sdCard.isSDCardPresent() ) {
+                        sdCard.addRecord(newRecordIMU);
+                        if ( sensorIMU.addEulerAngleList(sensorIMU.getEulerAngles(sensorIMU.getQuaternion())) >= 50 ) {
+                            String filename =  "/EA" + addressIdESP.substring(4) + String(bootSequence) + ".dat";
+                            sdCard.appendFile(SD, filename.c_str(), sensorIMU.getStringEADatas(unixTimeNow, bootSequence).c_str());
+                            Serial.println(sensorIMU.getStringEADatas(unixTimeNow, bootSequence));
+                        }
+                    }
 
                     recordCounterIMU++;
 

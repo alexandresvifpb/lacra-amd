@@ -40,6 +40,7 @@ boolean WiFiOTALib::initSTA(void) {
         webServer.begin(serverPort);
         connectedModeSTA = true;
     } else {
+        disconnectSTA();
         connectedModeSTA = false;
     }
 
@@ -56,6 +57,26 @@ boolean WiFiOTALib::isConnectedSTA(void) {
 
     ( WiFi.status() == WL_CONNECTED ) ? connectedModeSTA = true: connectedModeSTA = false;
     return connectedModeSTA;
+}
+
+// Set WiFi em off
+void WiFiOTALib::disconnectSTA(void) {
+    webServer.stopAll();
+    WiFi.mode(WIFI_OFF);
+    connectedModeSTA = false;
+}
+
+//
+boolean WiFiOTALib::checkConnection(void) {
+    boolean rest = false;
+    if ( WiFi.status() == WL_CONNECTED ) {
+        Serial.println("WL_CONNECTED");
+        rest = true;
+    } else if ( WiFi.status() == WL_CONNECTION_LOST ) {
+        Serial.println("WL_CONNECTION_LOST");
+        rest = false;
+    }
+    return rest;
 }
 
 // 

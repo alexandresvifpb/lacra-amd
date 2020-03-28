@@ -11,16 +11,20 @@
 #include <esp_system.h>
 #include <time.h>
 #include <sys/time.h>
+#include <driver/adc.h>
+#include <esp_adc_cal.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// #define ESP32_TIME_DELAY            (120000)            // in miles seconds
-#define RESET_CONT_BOOT             (false)             // resets the bootsequence counter variable in the EEPROM
+// #define ESP32_TIME_DELAY            (120000)     // in miles seconds
+#define RESET_CONT_BOOT             (false)         // resets the bootsequence counter variable in the EEPROM
+#define VBAT_PIN                    (36)
+#define MINIMUM_BATTERY_VOLTAGE     (7.00)          // minimum battery voltage
 
-const uint64_t minUnixTime = 1577840400;             // 01/01/2020 00:00:00 
-const uint64_t maxUnixTime = 1672531199;             // 01/01/2021 00:00:00
+const uint64_t minUnixTime = 1577840400;            // 01/01/2020 00:00:00 
+const uint64_t maxUnixTime = 1672531199;            // 01/01/2021 00:00:00
 
 typedef struct {
     String id;
@@ -80,11 +84,12 @@ class ESP32NodeLib
         unsigned long getUnixTimeNow(void);
         void setUnixTime(unsigned long unixTime);
         boolean isValidUnixTime(uint64_t currentUnixTime);
+        float getVBat(void);
+        boolean checkBattery(void);
 
     private:
 
 };
-
 
 #ifdef __cplusplus
 }

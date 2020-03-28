@@ -153,6 +153,8 @@ void TaskLoRa( void * pvParameters ) {
             if (lora.loraDebugMain) Serial.print("strRecv: ");
             if (lora.loraDebugMain) Serial.println(strRecv);
 
+            oled.setOTAMessageShowOledScreen(messageRecv.payload);
+
 /*
             if (messageRecv.type != 9) {
             listMessageSendMQTT.add(strRecv);

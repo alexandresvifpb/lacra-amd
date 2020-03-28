@@ -21,6 +21,10 @@ extern "C" {
 #define LORA_TASK_DELAY_MS          (1)
 #define LORA_DELAY_SEND_RECORD      (5000)
 
+enum TscaleRecvLoRa {
+  TYPE_RECV_COMMAND_RESET = 0,
+};
+
 typedef struct {
     String id;
     uint8_t type;
@@ -39,14 +43,16 @@ class LoRaNodeLib
         boolean send(String strSend);
         boolean isReceived(void);
         String getStrRecv(void);
+        recordFormatLoRa_t getRecv(void);
 
         uint32_t tsLoRaTaskDelayMS = LORA_TASK_DELAY_MS;
 
     private:
-        String encodeJSON(recordFormatLoRa_t msgSend);
         static void onReceive(int packetSize);
         void SetRxMode(void);
         void SetTxMode(void);
+        String encodeJSON(recordFormatLoRa_t msgSend);
+        static recordFormatLoRa_t decodeJSON(String strJSONRecv);
 
         uint64_t lastSendTime = millis();
         uint32_t tsLoRaDelaySendRecord = LORA_DELAY_SEND_RECORD;
