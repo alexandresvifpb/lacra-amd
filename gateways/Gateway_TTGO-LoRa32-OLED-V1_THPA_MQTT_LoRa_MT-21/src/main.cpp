@@ -384,8 +384,12 @@ void TaskLoRa( void * pvParameters ) {
                 String commandEpochTime = "{\"id\":\"";
                 commandEpochTime += messageRecv.id;
                 commandEpochTime += "\",\"type\":10,\"payload\":[";
+<<<<<<< HEAD
                 // commandEpochTime += (unsigned long)mqttClient.getEpochTime();
                 commandEpochTime += "11111111111";
+=======
+                commandEpochTime += (unsigned long)mqttClient.getEpochTime();
+>>>>>>> ebe428416b04ded786b191fcd4a8a20633cc0f5b
                 commandEpochTime += "]}";
 
                 lora.send(commandEpochTime);
@@ -421,8 +425,12 @@ void TaskTHPA( void * pvParameters ) {
         thpa.read();
         if (thpa.avaliable()) {
 
+<<<<<<< HEAD
             // String strTHPADatas = thpa.getStrDataTHPA(mqttClient.getEpochTime(), addressIdESP);
             String strTHPADatas = thpa.getStrDataTHPA(1111111111, addressIdESP);
+=======
+            String strTHPADatas = thpa.getStrDataTHPA(mqttClient.getEpochTime(), addressIdESP);
+>>>>>>> ebe428416b04ded786b191fcd4a8a20633cc0f5b
             listMessageSendMQTT.add(strTHPADatas);
             numberMessageSendMQTT++;
 

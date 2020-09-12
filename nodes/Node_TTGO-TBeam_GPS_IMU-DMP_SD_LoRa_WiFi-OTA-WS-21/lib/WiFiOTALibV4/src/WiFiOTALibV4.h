@@ -22,8 +22,13 @@ const uint16_t tsWiFiOTATaskDelayMS = WIFIOTA_TASK_DELAY_MS;
 // #define END_UNIXTIME                    (1641164807)
 
 // OTA
+<<<<<<< HEAD
 #define WIFI_STA_SSID                   ("brisa-594111")                 // "brisa-594111" "AMD";
 #define WIFI_STA_PASS                   ("gbalklxz")         // "gbalklxz" "amd12345678";
+=======
+#define WIFI_STA_SSID                   ("AMD")                 // "brisa-594111";
+#define WIFI_STA_PASS                   ("amd12345678")         // "gbalklxz";
+>>>>>>> ebe428416b04ded786b191fcd4a8a20633cc0f5b
 #define WIFI_AP_SSID                    ("Node-")               // "brisa-594111";
 #define WIFI_AP_PASS                    ("12345678")            // "gbalklxz";
 #define HOSTNAME                        ("Node-")               // ("Node-25AA24")

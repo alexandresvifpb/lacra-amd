@@ -109,7 +109,11 @@ void setup()
     //Cria uma Task que executará a funcao TaskTHPA(), com prioridade 1 e rodando no nucleo 0
     xTaskCreatePinnedToCore(
                     TaskWiFiOTA,     // Funcao com o codigo que implenta a Task
+<<<<<<< HEAD
                     "TaskSDCard",   // Nome da Task
+=======
+                    "TaskWiFiOTA",   // Nome da Task
+>>>>>>> ebe428416b04ded786b191fcd4a8a20633cc0f5b
                     4096,           // Tamanho da pilha (stack) a serem alocada na criacao da Task
                     NULL,           // Parametros de entrada da Task
                     1,              // Prioridade da Task
@@ -672,10 +676,17 @@ void TaskIMU( void * pvParameters ) {
         if ( isActiveIMU ) 
         {
             
+<<<<<<< HEAD
             if ( sensorIMU.avaliable() ) 
             {
 
                 if ( sensorIMU.updateDatas() ) 
+=======
+            if ( sensorIMU.avaliable() )
+            {
+
+                if ( sensorIMU.updateDatas() )
+>>>>>>> ebe428416b04ded786b191fcd4a8a20633cc0f5b
                 {
 
                     IMU_t _datasIMU = sensorIMU.getIMU();
