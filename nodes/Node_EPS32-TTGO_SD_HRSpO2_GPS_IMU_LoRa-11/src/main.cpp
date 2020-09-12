@@ -132,9 +132,15 @@ void Task0code( void * pvParameters ) {
     // Inicializacao do sensor HR & SpO2
     Serial.println("Inicializando sensor HR & SpO2.....");
     if (!sensor_HRSpO2.begin()) {
-        isActiveHRSpO2 = false;
+      
+      Serial.println(__LINE__);
+      
+      isActiveHRSpO2 = false;
     } else {
-        isActiveHRSpO2 = true;
+      
+      Serial.println(__LINE__);
+      
+      isActiveHRSpO2 = true;
     }
 
     for(;;) {
@@ -148,6 +154,9 @@ void Task0code( void * pvParameters ) {
             sensor_HRSpO2.run();
 
             if (sensor_HRSpO2.avaliable()) {
+      
+      Serial.println(__LINE__);
+      
                 strParametersHRSpO2 = sensor_HRSpO2.getStrParamHRSpO2(nowTime());
                 if (sdCard.isSDCardPresent()) {
                     // sdCard.appendFile(SD, "/Teste.dat", strParametersGPS.c_str());

@@ -43,9 +43,9 @@ extern "C" {
 
 // NTP
 #define NTP_UTC_OFFSET              (-3)
-#define NTP_TIME_ADJUSTMENT         (3600)              // adjustment
-#define NTP_UPDATE_INTERVAL         (60000)             // updateIntervaltimeZone
-#define NTP_SERVER                  ("192.168.10.10")       //("10.0.5.70")       // "europe.pool.ntp.org"
+#define NTP_TIME_ADJUSTMENT         (3600)                  // adjustment
+#define NTP_UPDATE_INTERVAL         (60000)                 // updateIntervaltimeZone
+#define NTP_SERVER                  ("0.br.pool.ntp.org")   // ("192.168.10.10")       //("10.0.5.70")       // "europe.pool.ntp.org"
 
 typedef struct {
     uint32_t sdTaskDelayMS;

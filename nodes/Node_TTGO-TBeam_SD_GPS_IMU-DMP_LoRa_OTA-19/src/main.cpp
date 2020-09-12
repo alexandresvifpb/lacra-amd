@@ -78,6 +78,7 @@ void setup() {
     {
         validDateTime = true;
     }
+
     //Cria uma Task que executará a funcao TaskTHPA(), com prioridade 1 e rodando no nucleo 0
     xTaskCreatePinnedToCore(
                     TaskSDCard,     // Funcao com o codigo que implenta a Task

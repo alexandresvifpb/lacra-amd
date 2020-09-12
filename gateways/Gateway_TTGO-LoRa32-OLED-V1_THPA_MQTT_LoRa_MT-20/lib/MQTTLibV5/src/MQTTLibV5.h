@@ -12,7 +12,7 @@ extern "C" {
 #endif
 
 #define MQTT_TOPIC              ("AMD")
-#define MQTT_SERVER             ("192.168.10.10")      //("192.168.10.50") ("10.0.5.50")       // ("192.168.1.2") // ("ec2-52-14-53-218.us-east-2.compute.amazonaws.com")   //  ("192.168.1.7")   //  ("150.165.82.50")
+#define MQTT_SERVER             ("192.168.1.12")      //("192.168.10.50") ("10.0.5.50")       // ("192.168.1.2") // ("ec2-52-14-53-218.us-east-2.compute.amazonaws.com")   //  ("192.168.1.7")   //  ("150.165.82.50")
 #define MQTT_PORT               (1883)              //(1883)              //  (995)
 #define MQTT_MAX_TRANSFER_SIZE  (180)
 #define MQTT_DEBUG_MAIN         (false)
@@ -23,8 +23,8 @@ extern "C" {
 #define MQTT_RECV_TASK_DELAY_MS (200)
 #define MQTT_DEBUG_MESSAGE      ("MQTT_TASK: ")
 
-#define WIFI_SSID               ("AMD")             // ("brisa-594111") ("RPi3_AMD") ("AMD")
-#define WIFI_PASS               ("amd12345678")     // ("gbalklxz") ("amd12345678") ("amd123456")
+#define WIFI_SSID               ("brisa-594111")             // ("brisa-594111") ("RPi3_AMD") ("AMD")
+#define WIFI_PASS               ("gbalklxz")     // ("gbalklxz") ("amd12345678") ("amd123456")
 #define WIFI_DEBUG              (true)
 
 #define NTP_UTC_OFFSET          (-3)

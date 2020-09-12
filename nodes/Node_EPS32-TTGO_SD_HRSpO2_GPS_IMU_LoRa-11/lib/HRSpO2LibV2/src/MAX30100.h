@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define DEFAULT_PULSE_WIDTH         MAX30100_SPC_PW_1600US_16BITS
 #define DEFAULT_RED_LED_CURRENT     MAX30100_LED_CURR_50MA
 #define DEFAULT_IR_LED_CURRENT      MAX30100_LED_CURR_50MA
-#define EXPECTED_PART_ID            0x11
+#define EXPECTED_PART_ID            21    //0x11
 
 #define PIN_WIRE_SDA                (21)    //(0)                // Pino do Heltec LoRa ESP32 para a porta I2C SDA (GPIO_NUM_21)
 #define PIN_WIRE_SCL                (22)    //(4)                // Pino do Heltec LoRa ESP32 para a porta I2C SCL (GPIO_NUM_22)
